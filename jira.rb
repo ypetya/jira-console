@@ -130,6 +130,4 @@ def list find=nil,key=nil
 end
 
 
-
 list @@find,@@key
-
