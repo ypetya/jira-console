@@ -1,0 +1,62 @@
+
+ This is just a simle script to find, search or display your jira tasks to console.
+
+
+ == Installation ==
+
+
+ To get this working, first install a few gems:
+
+     $ gem install soap4r
+
+ Now, jira4r, which has to be pulled down from subversion:
+
+     $ svn co http://svn.rubyhaus.org/jira4r/trunk jira4r
+     $ cd jira4r
+     $ gem build jira4r.gemspec
+     $ gem install jira4r-*.gem
+
+ example:
+ http://svn.atlassian.com/fisheye/browse/public/contrib/jira/rt3-exporter/trunk/util/notifyImportedUsers.rb?r=26539
+
+
+ == Config ==
+
+
+ Config file contains my jira_user and jira_password in form of:
+ @@settings => { :jira=>['user','password'],
+   :jira_service =>{ :jira=>'url', :filer=>'filter_id_from_jira'
+ }
+ filter_id: if you create a filter in Jira, you can find this id in the url
+
+
+ == Usage ==
+
+
+ This is the help from jira.rb
+
+Optional parameter arguments format: param=value"
+
+Call jira.rb with 
+
+ * jira=jira_url 
+    override default jira url
+ * filter=filter_number 
+    override/set jira filter id
+ * user=user_name 
+    override default jira user name
+ * pwd=jira_pwd 
+    override default jira password
+ * display=short|detail 
+    display short makes issue number, summary list.(default setting)
+    display full prints out all information
+ * total=true|false 
+    display found issues count
+ * description=true|false 
+    display description
+ * reporter=true|false 
+    display reporter
+ * key=issue_key 
+    key searches for jira issue find is a regex key
+ * find=search_regex
+    find searches for jira issue find is a regex in summary or description or reporter
