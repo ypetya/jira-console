@@ -129,5 +129,4 @@ def list find=nil,key=nil
   puts "Total: #{@@counter} tasks found." if @@total=='true'
 end
 
-
 list @@find,@@key
