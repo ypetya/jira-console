@@ -1,0 +1,12 @@
+= Original
+
+  * http://blogs.reucon.com/srt/2007/11/08/extracting_jira_worklogs_from_subversion.html
+
+= References
+
+  * http://svn.reucon.net/repos/svn-worklog/trunk/
+  * Accessing Jira from Ruby
+  * Jira RPC Plugin
+  * Commit Acceptance Plugin
+  * JRA-13176 - consider to vote for it if you want to see support for impersonation in the official Jira RPC Plugin
+
