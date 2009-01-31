@@ -1,6 +1,6 @@
 
- This is just a simle script to find, search or display your jira tasks to console.
-
+ This is just a simle script to find, search, display your jira tasks to console.
+ Commit worklog implemented.
 
  == Installation ==
 
@@ -35,28 +35,50 @@
 
  This is the help from jira.rb
 
-Optional parameter arguments format: param=value"
+ Optional parameter arguments format: param=value
 
-Call jira.rb with 
+  Call jira.rb <command> <arguments>
 
- * jira=jira_url 
-    override default jira url
- * filter=filter_number 
-    override/set jira filter id
- * user=user_name 
-    override default jira user name
- * pwd=jira_pwd 
-    override default jira password
- * display=short|detail 
-    display short makes issue number, summary list.(default setting)
-    display full prints out all information
- * total=true|false 
-    display found issues count
- * description=true|false 
-    display description
- * reporter=true|false 
-    display reporter
- * key=issue_key 
-    key searches for jira issue find is a regex key
- * find=search_regex
-    find searches for jira issue find is a regex in summary or description or reporter
+
+  COMMANDS: (optional)
+
+   * list
+      display jira issues (default command) 
+   * log
+      posts worklog to jira
+   * help
+      displays this help message
+
+
+  ARGUMENTS:
+   
+  aguments for command 'log'
+  
+   * key=issue_key
+   * time=<jira time format>
+   * message=<string message>
+
+  optional arguments for command 'list'
+
+   * jira=jira_url 
+      override default jira url
+   * filter=filter_number 
+      override/set jira filter id
+   * user=user_name 
+      override default jira user name
+   * pwd=jira_pwd 
+      override default jira password
+   * display=short|detail 
+      display short makes issue number, summary list.(default setting)
+      display full prints out all information
+   * total=true|false 
+      display found issues count
+   * description=true|false 
+      display description
+   * reporter=true|false 
+      display reporter
+   * key=issue_key 
+      key searches for jira issue find is a regex key
+   * find=search_regex
+      find searches for jira issue find is a regex in summary or description or reporter
+

@@ -37,7 +37,7 @@ class JiraConsole
   HELP = <<-EOT
   Usage: 
 
-  Optional parameter arguments format: param=value"
+  Optional parameter arguments format: param=value
 
   Call jira.rb <command> <arguments>
 
