@@ -29,6 +29,7 @@ load '/etc/my_ruby_scripts/settings.rb'
 # and the show must go on...
 #
 require 'jira4r/jira_tool'
+require 'yaml'
 
 class JiraConsole
   attr_accessor :errors
@@ -53,6 +54,14 @@ class JiraConsole
 
 
   ARGUMENTS:
+
+  if you left one of the required arguments, 
+  jira-console tries to start your default editor ENV["EDITOR"] or vim.
+
+  arguments for command 'comment'
+
+   * key=issue_key
+   * message=<string message>
    
   aguments for command 'log'
   
@@ -70,8 +79,9 @@ class JiraConsole
       override default jira user name
    * pwd=jira_pwd 
       override default jira password
-   * display=short|detail 
+   * display=short|comments|detail 
       display short makes issue number, summary list.(default setting)
+      display short with comments
       display full prints out all information
    * total=true|false 
       display found issues count
@@ -85,7 +95,7 @@ class JiraConsole
       find searches for jira issue find is a regex in summary or description or reporter
 EOT
   # }}}
-  COMMANDS = [:log,:list,:help]
+  COMMANDS = [:log,:list,:help,:comment]
 
   def initialize settings,args
     @errors = []
@@ -99,19 +109,6 @@ EOT
     call_with_err :load_parameters
     call_with_err :parse,*args
     log_errors
-  end
-
-  def my_method_caller method, *args
-    (args.empty? ? send(method) : send(method,*args))
-  end
-
-  def call_with_err method,*args
-    return unless success?
-    @errors << method unless my_method_caller method,*args
-  end
-
-  def success?
-    errors.empty?
   end
 
   # {{{ jira and user parameters
@@ -136,6 +133,21 @@ EOT
   end
   # }}}
 
+# {{{ command execution
+  
+  def success?
+    errors.empty?
+  end
+
+  def my_method_caller method, *args
+    (args.empty? ? send(method) : send(method,*args))
+  end
+
+  def call_with_err method,*args
+    return unless success?
+    @errors << method unless my_method_caller method,*args
+  end
+
   def valid_command?
     return false if @command.empty?
     COMMANDS.include? @command.first
@@ -151,6 +163,7 @@ EOT
   def log_errors
     puts "Errors: #{@errors.join(',')}." unless success?
   end
+# }}}
 
   # {{{ ARGV parser and minimal help
   def parse *args
@@ -188,12 +201,37 @@ EOT
   end
   # }}}
 
+  # {{{ command helpers
+
+  def check_required param
+    a=instance_eval("defined?(@#{param})")
+    return if a and not a.empty?
+    filename = "#{param}.jira.tmp"
+    system("echo \"\# please enter missing parameter#{param} or parameters in standard YAML format\" > #{filename}")
+    cmd = "#{ENV['EDITOR'] || 'vim'} #{filename}"
+    system("#{cmd}")
+    hash = YAML.load_file(filename)
+    hash.keys.each do |k|
+      eval("@#{k}='#{hash[k]}'")
+      puts "#{k} parameter loaded"
+    end
+    system("rm #{filename}")
+  end
+
   def match find,key,issue
     return true unless find or key
     return true if find and (issue.summary + issue.reporter + issue.key) =~ /#{find}/i
     return true if key and (issue.key =~ /#{key}/i)
     false
   end
+
+  def get_comments issue
+    @jira4r.getComments( issue.key ).each do |comment|
+      puts "-> #{comment.author} commented at #{comment.updated.strftime("%Y. %b %e., %H:%M")}:"
+      puts comment.body
+    end
+  end
+
 
   def init_jira
     create_logger
@@ -209,7 +247,9 @@ EOT
     puts HELP
     true
   end
+# }}}
 
+# {{{ commands
   def list
     @counter = 0
     #main listing
@@ -218,12 +258,9 @@ EOT
       @counter += 1
       puts "#{issue.key} : #{issue.summary}"
       puts "Reporter : #{issue.reporter}" if @reporter == 'true'
-      if @description == 'true'
-        puts '-' * 20
-        puts "DESCRIPTION:\r\n#{issue.description}" 
-        puts '.'
-      end
-      #puts issue.inspect
+      puts "DESCRIPTION:\r\n#{issue.description}" if @description == 'true'
+      get_comments(issue) if %w{full comments}.include? @display
+      puts '.' if @description == 'true'
     end
 
     # total count
@@ -234,18 +271,33 @@ EOT
   end
 
   def log
-
+    %w{key message time}.each{|p| check_required(p) }
     wl = Jira4R::V2::RemoteWorklog.new
-    wl.comment = @message + "\ncreated from jira-console"
+    wl.comment = @message
     wl.startDate = Time.now
     wl.timeSpent = @time
-    @jira4r.addWorklogAndAutoAdjustRemainingEstimate(@key, wl)
+    @jira4r.addWorklogAndAutoAdjustRemainingEstimate(@key.upcase, wl)
 
-    puts "#{@key} - '#{@message}' : #{@time} logged"
+    puts "#{@key.upcase} - '#{@message}' : #{@time} logged"
+    true
+#  rescue
+#    false
+  end
+
+  def comment
+    %w{key message}.each{|p| check_required p }
+    c= Jira4R::V2::RemoteComment.new()
+    c.body= @message
+    @jira4r.addComment(@key.upcase,c)
+    puts " #{@key.upcase} - #{@message}"
+    puts "Comment added"
     true
   rescue
     false
   end
+  # }}}
+  
+
 end
 
 j = JiraConsole.new(@@settings,ARGV)
