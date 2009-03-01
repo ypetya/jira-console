@@ -35,7 +35,7 @@
 
  This is the help from jira.rb
 
- Optional parameter arguments format: param=value
+  Optional parameter arguments format: param=value
 
   Call jira.rb <command> <arguments>
 
@@ -44,13 +44,23 @@
 
    * list
       display jira issues (default command) 
+   * comment
+      post new comment on task
    * log
-      posts worklog to jira
+      posts worklog
    * help
       displays this help message
 
 
   ARGUMENTS:
+
+  if you left one of the required arguments, 
+  jira-console tries to start your default editor ENV["EDITOR"] or vim.
+
+  arguments for command 'comment'
+
+   * key=issue_key
+   * message=<string message>
    
   aguments for command 'log'
   
@@ -68,9 +78,10 @@
       override default jira user name
    * pwd=jira_pwd 
       override default jira password
-   * display=short|detail 
-      display short makes issue number, summary list.(default setting)
-      display full prints out all information
+   * display=short|comments|detail 
+      - display short makes issue number, summary list.(default setting)
+      - display short with comments
+      - display full prints out all information
    * total=true|false 
       display found issues count
    * description=true|false 
@@ -81,4 +92,3 @@
       key searches for jira issue find is a regex key
    * find=search_regex
       find searches for jira issue find is a regex in summary or description or reporter
-

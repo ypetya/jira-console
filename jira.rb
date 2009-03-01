@@ -47,8 +47,10 @@ class JiraConsole
 
    * list
       display jira issues (default command) 
+   * comment
+      post new comment on task
    * log
-      posts worklog to jira
+      posts worklog
    * help
       displays this help message
 
@@ -80,9 +82,9 @@ class JiraConsole
    * pwd=jira_pwd 
       override default jira password
    * display=short|comments|detail 
-      display short makes issue number, summary list.(default setting)
-      display short with comments
-      display full prints out all information
+      - display short makes issue number, summary list.(default setting)
+      - display short with comments
+      - display full prints out all information
    * total=true|false 
       display found issues count
    * description=true|false 
