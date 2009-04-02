@@ -234,6 +234,12 @@ EOT
     end
   end
 
+  def get_worklogs issue
+    @jira4r.getWorklogs( issue.key ).each do |worklog|
+      puts "#{worklog.author}(#{worklog.timeSpent}) : #{worklog.comment}"
+    end
+  end
+
 
   def init_jira
     create_logger
@@ -262,6 +268,7 @@ EOT
       puts "Reporter : #{issue.reporter}" if @reporter == 'true'
       puts "DESCRIPTION:\r\n#{issue.description}" if @description == 'true'
       get_comments(issue) if %w{full comments}.include? @display
+      get_worklogs(issue) if %w{full worklogs}.include? @display
       puts '.' if @description == 'true'
     end
 
@@ -282,13 +289,13 @@ EOT
 
     puts "#{@key.upcase} - '#{@message}' : #{@time} logged"
     true
-#  rescue
-#    false
+  rescue
+    false
   end
 
   def comment
     %w{key message}.each{|p| check_required p }
-    c= Jira4R::V2::RemoteComment.new()
+    c= Jira4R::V2::RemoteComment.new
     c.body= @message
     @jira4r.addComment(@key.upcase,c)
     puts " #{@key.upcase} - #{@message}"
