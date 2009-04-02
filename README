@@ -78,10 +78,11 @@
       override default jira user name
    * pwd=jira_pwd 
       override default jira password
-   * display=short|comments|detail 
+   * display=short|comments|full|worklogs
       - display short makes issue number, summary list.(default setting)
       - display short with comments
       - display full prints out all information
+      - display worklogs prints out short format with worklog ingormation
    * total=true|false 
       display found issues count
    * description=true|false 
