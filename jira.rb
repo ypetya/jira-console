@@ -98,7 +98,7 @@ class JiraConsole
       find searches for jira issue find is a regex in summary or description or reporter
 EOT
   # }}}
-  COMMANDS = [:log,:list,:help,:comment]
+  COMMANDS = [:log,:list,:help,:comment,:fixlog]
 
   def initialize settings,args
     @errors = []
@@ -210,10 +210,14 @@ EOT
     a=instance_eval("defined?(@#{param})")
     return if a and not a.empty?
     filename = "#{param}.jira.tmp"
-    system("echo \"\# please enter missing parameter#{param} or parameters in standard YAML format\" > #{filename}")
+    system("echo \"\# please enter missing parameter or parameters in standard YAML format\n#{param}:\n\" > #{filename}")
     cmd = "#{ENV['EDITOR'] || 'vim'} #{filename}"
+    
     system("#{cmd}")
     hash = YAML.load_file(filename)
+   
+    throw 'not valid yaml format! try: "param: value"' unless defined?(hash.keys)
+
     hash.keys.each do |k|
       eval("@#{k}='#{hash[k]}'")
       puts "#{k} parameter loaded"
@@ -259,6 +263,7 @@ EOT
 # }}}
 
 # {{{ commands
+  # This command will print out the informations from jira
   def list
     @counter = 0
     #main listing
@@ -280,6 +285,7 @@ EOT
     false
   end
 
+  # This command helps to create new worklogs
   def log
     %w{key message time}.each{|p| check_required(p) }
     wl = Jira4R::V2::RemoteWorklog.new
@@ -294,6 +300,7 @@ EOT
     false
   end
 
+  # This command helps creating comments on issue
   def comment
     %w{key message}.each{|p| check_required p }
     c= Jira4R::V2::RemoteComment.new
@@ -304,6 +311,20 @@ EOT
     true
   rescue
     false
+  end
+
+  # This command helps you to create avarage worklog time for a day
+  def fixlog
+    %w{date total_hours keys}.each{|p| check_required p}
+    throw 'not implemented yet!'
+    @keys.spit(',').each do |key|
+      @jira4r.getWorklogs( key ).each do |worklog|
+        if worklog.author == @user
+          puts worklog.inspect
+          puts "#{worklog.author}(#{worklog.timeSpent}) : #{worklog.comment}"
+        end
+      end
+    end
   end
   # }}}
   
