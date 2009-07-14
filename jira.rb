@@ -183,13 +183,13 @@ EOT
     sum = 0
     on = []
     @stoppers.each do |stopper|
-      on << stopper.key if stopper.on?
+      on << stopper.task if stopper.on?
     end
 
     if @stoppers.length > 0
       puts "There are #{@stoppers.length} stoppers."
       
-      puts "Active stoppers:( #{on.length} : #{on.join(', ')} )." if on.length > 0
+      puts( "Active stoppers:( #{on.length} : #{on.join(', ')} ).")  if on.length > 0
     else
       puts "No stoppers."
     end
@@ -388,7 +388,7 @@ EOT
     stop
     
     @stoppers.each do |stopper|
-      @key = @stopper.key
+      @key = stopper.task
       @time = "#{stopper.total_minutes.to_i}m"
       @message = ''
       log
