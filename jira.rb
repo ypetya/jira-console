@@ -167,19 +167,14 @@ EOT
   end
 
   # {{{ jira and user parameters
-  def load_parameters
-    return false unless (@service.keys & [:jira,:filter]).size == 2
-    @jira = @service[:jira]
-    @filter = @service[:filter]
-    @user = @settings[:jira].first
-    @pwd = @settings[:jira].last
 
+  def load_stoppers
     if File.exists?(CONFIG_FILE)
       @stoppers = YAML::load_file(CONFIG_FILE)
     else
       @stoppers = []
     end
-    
+
     sum = 0
     on = []
     @stoppers.each do |stopper|
@@ -193,6 +188,16 @@ EOT
     else
       puts "No stoppers."
     end
+  end
+
+  def load_parameters
+    return false unless (@service.keys & [:jira,:filter]).size == 2
+    @jira = @service[:jira]
+    @filter = @service[:filter]
+    @user = @settings[:jira].first
+    @pwd = @settings[:jira].last
+   
+    load_stoppers
 
     true
   rescue
@@ -347,7 +352,7 @@ EOT
 # {{{ commands
 
   def start
-    sel = @stoppers.select{|s| s.key == @key}
+    sel = @stoppers.select{|s| s.task == @key}
     if sel.empty?
       sel = [ TaskStopper.new(@key) ]
       @stoppers << sel.first
