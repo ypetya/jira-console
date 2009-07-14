@@ -396,7 +396,9 @@ EOT
       @key = stopper.task
       @time = "#{stopper.total_minutes.to_i}m"
       @message = ''
-      log
+      unless log
+        puts "can not log for #{@key} : #{@time} "
+      end
     end
 
     puts "All timers pushed."
