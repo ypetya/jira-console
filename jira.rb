@@ -179,6 +179,24 @@ EOT
     else
       @stoppers = []
     end
+    
+    sum = 0
+    on = []
+    @stoppers.each do |stopper|
+      on << stopper.key if stopper.on?
+    end
+
+    if @stoppers.length > 0
+      puts "There are #{@stoppers.length} stoppers."
+      
+      puts "Active stoppers:( #{on.length} : #{on.join(', ')} )." if on.length > 0
+    else
+      puts "No stoppers."
+    end
+
+    true
+  rescue
+    false
   end
 
   def save_stoppers
