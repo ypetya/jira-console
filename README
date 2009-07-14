@@ -35,6 +35,8 @@
 
  This is the help from jira.rb
 
+  Usage: 
+
   Optional parameter arguments format: param=value
 
   Call jira.rb <command> <arguments>
@@ -50,7 +52,17 @@
       posts worklog
    * help
       displays this help message
+   
+   Timer commands
 
+   * start
+      starts a timer for an issue
+   * stop 
+      stops all timers
+   * push 
+      push timers logged times to jira
+   * clear
+      clear a timer data
 
   ARGUMENTS:
 
@@ -78,7 +90,7 @@
       override default jira user name
    * pwd=jira_pwd 
       override default jira password
-   * display=short|comments|full|worklogs
+   * display=short|comments|full|worklogs 
       - display short makes issue number, summary list.(default setting)
       - display short with comments
       - display full prints out all information
@@ -93,3 +105,7 @@
       key searches for jira issue find is a regex key
    * find=search_regex
       find searches for jira issue find is a regex in summary or description or reporter
+
+  arguments for command 'start'
+    * key=issue_key
+

@@ -31,8 +31,44 @@ load '/etc/my_ruby_scripts/settings.rb'
 require 'jira4r/jira_tool'
 require 'yaml'
 
+class TaskStopper
+
+  attr_accessor :task, :time_intervals, :current_start
+
+  def initialize key
+    @task = key
+    @time_intervals = []
+    @current_start = nil
+  end
+
+  def start
+    return false if on? 
+    @current_start = Time.now
+  end
+
+  def stop
+    return false unless on? 
+    @time_intervals << (Time.now - @current_start)
+    @current_start = nil
+  end
+
+  def total_minutes
+    sum = 0
+    @time_intervals.each{|i| sum += i }
+    return sum / 60
+  end
+
+  def on?
+    @current_start ? true : false
+  end
+
+  def display
+    "#{@key} : Timer is #{ on? ? 'ON' : 'OFF'} measured #{total_minutes} total minutes."
+  end
+end
+
 class JiraConsole
-  attr_accessor :errors
+  attr_accessor :errors, :stoppers
 
   # {{{ HELP message
   HELP = <<-EOT
@@ -53,7 +89,17 @@ class JiraConsole
       posts worklog
    * help
       displays this help message
+   
+   Timer commands
 
+   * start
+      starts a timer for an issue
+   * stop 
+      stops all timers
+   * push 
+      push timers logged times to jira
+   * clear
+      clear a timer data
 
   ARGUMENTS:
 
@@ -96,9 +142,15 @@ class JiraConsole
       key searches for jira issue find is a regex key
    * find=search_regex
       find searches for jira issue find is a regex in summary or description or reporter
+
+  arguments for command 'start'
+    * key=issue_key
+
 EOT
   # }}}
-  COMMANDS = [:log,:list,:help,:comment,:fixlog]
+  COMMANDS = [:log,:list,:help,:comment,:fixlog,:start,:stop,:push,:clear]
+
+  CONFIG_FILE = File.join(File.expand_path('~'), 'jira.yml')
 
   def initialize settings,args
     @errors = []
@@ -121,6 +173,18 @@ EOT
     @filter = @service[:filter]
     @user = @settings[:jira].first
     @pwd = @settings[:jira].last
+
+    if File.exists?(CONFIG_FILE)
+      @stoppers = YAML::load_file(CONFIG_FILE)
+    else
+      @stoppers = []
+    end
+  end
+
+  def save_stoppers
+    File.open(CONFIG_FILE,'w') do |f|
+      f.puts @stoppers.to_yaml
+    end
   end
   # }}}
 
@@ -263,6 +327,63 @@ EOT
 # }}}
 
 # {{{ commands
+
+  def start
+    sel = @stoppers.select{|s| s.key == @key}
+    if sel.empty?
+      sel = [ TaskStopper.new(@key) ]
+      @stoppers << sel.first
+    end
+    sel.first.start
+
+    save_stoppers
+
+    puts "Timer started for #{@key}"
+    true
+  rescue
+    false
+  end
+
+  def stop
+    @stoppers.each{|s| s.stop}
+
+    save_stoppers
+
+    puts "All timer stopped."
+    true
+  rescue
+    false
+  end
+
+  def clear
+    @stoppers = []
+
+    save_stoppers
+
+    puts "All timer cleared."
+    true
+  rescue
+    false
+  end
+
+  def push
+    stop
+    
+    @stoppers.each do |stopper|
+      @key = @stopper.key
+      @time = "#{stopper.total_minutes.to_i}m"
+      @message = ''
+      log
+    end
+
+    puts "All timers pushed."
+
+    clear
+    true
+  rescue
+    false
+  end
+  
   # This command will print out the informations from jira
   def list
     @counter = 0
