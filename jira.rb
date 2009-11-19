@@ -82,24 +82,26 @@ class JiraConsole
   COMMANDS: (optional)
 
    * list
-      display jira issues (default command) 
+       display jira issues (default command) 
    * comment
-      post new comment on task
+       post new comment on task
    * log
-      posts worklog
+       posts worklog
    * help
-      displays this help message
+       displays this help message
+   * open
+       opens jira task in firefox
    
    Timer commands
 
    * start
-      starts a timer for an issue
+       starts a timer for an issue
    * stop 
-      stops all timers
+       stops all timers
    * push 
-      push timers logged times to jira
+       push timers logged times to jira
    * clear
-      clear a timer data
+       clear a timer data
 
   ARGUMENTS:
 
@@ -146,9 +148,12 @@ class JiraConsole
   arguments for command 'start'
     * key=issue_key
 
+  arguments for command 'open'
+    * key=issue_key
+
 EOT
   # }}}
-  COMMANDS = [:log,:list,:help,:comment,:fixlog,:start,:stop,:push,:clear]
+  COMMANDS = [:log,:list,:help,:comment,:fixlog,:start,:stop,:push,:clear,:open]
 
   CONFIG_FILE = File.join(File.expand_path('~'), 'jira.yml')
 
@@ -454,6 +459,14 @@ EOT
     @jira4r.addComment(@key.upcase,c)
     puts " #{@key.upcase} - #{@message}"
     puts "Comment added"
+    true
+  rescue
+    false
+  end
+
+  def open
+    check_required 'key'
+    system( 'firefox', "#{@service[:jira]}/browse/#{@key.upcase}")
     true
   rescue
     false
