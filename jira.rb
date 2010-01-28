@@ -90,7 +90,7 @@ class JiraConsole
    * help
        displays this help message
    * open
-       opens jira task in firefox
+       opens jira task in browser
    
    Timer commands
 
@@ -466,7 +466,7 @@ EOT
 
   def open
     check_required 'key'
-    system( 'firefox', "#{@service[:jira]}/browse/#{@key.upcase}")
+    system( 'xdg-open', "#{@service[:jira]}/browse/#{@key.upcase}")
     true
   rescue
     false
