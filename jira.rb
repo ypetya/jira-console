@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
-# ypetya@gmail.com
+# :title:JiraConsole
 #
-# == Installation ==
+# == Installation
 #
 # To get this working, first install a few gems:
 #
@@ -17,20 +17,21 @@
 # example:
 # http://svn.atlassian.com/fisheye/browse/public/contrib/jira/rt3-exporter/trunk/util/notifyImportedUsers.rb?r=26539
 #
-# == Config ==
+# == Config
 #
 # Config file contains my jira_user and jira_password in form of:
-# @@settings => { :jira=>['user','password'],
-#   :jira_service =>{ :jira=>'url', :filer=>'filter_id_from_jira'
-# }
+#
+#   @@settings => { :jira=>['user','password'],
+#     :jira_service =>{ :jira=>'url', :filer=>'filter_id_from_jira'
+#   }
+#
 # filter_id: if you create a filter in Jira, you can find this id in the url
 load '/etc/my_ruby_scripts/settings.rb'
-#
-# and the show must go on...
-#
+
 require 'jira4r/jira_tool'
 require 'yaml'
 
+# This class can store different intervals for one issue 
 class TaskStopper
 
   attr_accessor :task, :time_intervals, :current_start
