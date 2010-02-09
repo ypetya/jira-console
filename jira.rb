@@ -1,11 +1,13 @@
 #!/usr/bin/env ruby
 # :title:JiraConsole
 #
-# == Installation
+# = Installation
+#
+# == Preresquites
 #
 # To get this working, first install a few gems:
 #
-#     $ gem install soap4r
+#     $ gem install soap4r rdoc --no-ri --no-rdoc
 #
 # Now, jira4r, which has to be pulled down from subversion:
 #
@@ -26,10 +28,93 @@
 #   }
 #
 # filter_id: if you create a filter in Jira, you can find this id in the url
+#
+# = Usage
+#
+#  Parameter and optional arguments format: param=value
+#
+#  Call jira.rb <command> <arguments>
+#
+# == COMMANDS: (optional)
+#
+#  * list
+#       display jira issues (default command) 
+#  * comment
+#       post new comment on task
+#  * log
+#       posts worklog
+#  * help
+#       displays this help message
+#  * open
+#       opens jira task in browser
+#   
+# === Timer commands
+#
+#    * start
+#       starts a timer for an issue
+#    * stop 
+#       stops all timers
+#    * push 
+#       push timers logged times to jira
+#    * clear
+#       clear a timer data
+#
+# == ARGUMENTS:
+#
+#  if you left one of the required arguments, 
+#  jira-console tries to start your default editor ENV["EDITOR"] or vim.
+#
+#  - arguments for command 'comment'
+#
+#    * key=issue_key
+#    * message=<string message>
+#   
+#  - aguments for command 'log'
+#  
+#    * key=issue_key
+#    * time=<jira time format>
+#    * message=<string message>
+#
+#  - optional arguments for command 'list'
+#
+#    * jira=jira_url 
+#      override default jira url
+#    * filter=filter_number 
+#      override/set jira filter id
+#    * user=user_name 
+#      override default jira user name
+#    * pwd=jira_pwd 
+#      override default jira password
+#    * display=short|comments|full|worklogs 
+#       - display short makes issue number, summary list.(default setting)
+#       - display short with comments
+#       - display full prints out all information
+#       - display worklogs prints out short format with worklog ingormation
+#    * total=true|false 
+#      display found issues count
+#    * description=true|false 
+#      display description
+#    * reporter=true|false 
+#      display reporter
+#    * key=issue_key 
+#      key searches for jira issue find is a regex key
+#    * find=search_regex
+#      find searches for jira issue find is a regex in summary or description or reporter
+#
+#  - arguments for command 'start'
+#    * key=issue_key
+#
+#  - arguments for command 'open'
+#    * key=issue_key
+#
+
+
 load '/etc/my_ruby_scripts/settings.rb'
+
 
 require 'jira4r/jira_tool'
 require 'yaml'
+require 'rdoc/usage'
 
 # This class can store different intervals for one issue 
 class TaskStopper
@@ -42,17 +127,20 @@ class TaskStopper
     @current_start = nil
   end
 
+  # starts an interval unless +@current_start+ exists
   def start
     return false if on? 
     @current_start = Time.now
   end
 
+  # closes an interval if +@current_start+ exists
   def stop
     return false unless on? 
     @time_intervals << (Time.now - @current_start)
     @current_start = nil
   end
 
+  # summarize stored intervals
   def total_minutes
     sum = 0
     @time_intervals.each{|i| sum += i }
@@ -68,96 +156,19 @@ class TaskStopper
   end
 end
 
+# This is the main class of the script
 class JiraConsole
   attr_accessor :errors, :stoppers
 
-  # {{{ HELP message
-  HELP = <<-EOT
-  Usage: 
-
-  Optional parameter arguments format: param=value
-
-  Call jira.rb <command> <arguments>
-
-
-  COMMANDS: (optional)
-
-   * list
-       display jira issues (default command) 
-   * comment
-       post new comment on task
-   * log
-       posts worklog
-   * help
-       displays this help message
-   * open
-       opens jira task in browser
-   
-   Timer commands
-
-   * start
-       starts a timer for an issue
-   * stop 
-       stops all timers
-   * push 
-       push timers logged times to jira
-   * clear
-       clear a timer data
-
-  ARGUMENTS:
-
-  if you left one of the required arguments, 
-  jira-console tries to start your default editor ENV["EDITOR"] or vim.
-
-  arguments for command 'comment'
-
-   * key=issue_key
-   * message=<string message>
-   
-  aguments for command 'log'
-  
-   * key=issue_key
-   * time=<jira time format>
-   * message=<string message>
-
-  optional arguments for command 'list'
-
-   * jira=jira_url 
-      override default jira url
-   * filter=filter_number 
-      override/set jira filter id
-   * user=user_name 
-      override default jira user name
-   * pwd=jira_pwd 
-      override default jira password
-   * display=short|comments|full|worklogs 
-      - display short makes issue number, summary list.(default setting)
-      - display short with comments
-      - display full prints out all information
-      - display worklogs prints out short format with worklog ingormation
-   * total=true|false 
-      display found issues count
-   * description=true|false 
-      display description
-   * reporter=true|false 
-      display reporter
-   * key=issue_key 
-      key searches for jira issue find is a regex key
-   * find=search_regex
-      find searches for jira issue find is a regex in summary or description or reporter
-
-  arguments for command 'start'
-    * key=issue_key
-
-  arguments for command 'open'
-    * key=issue_key
-
-EOT
-  # }}}
+  # These commands are available from command line. 
+  # See usage for the required and optional parameters
   COMMANDS = [:log,:list,:help,:comment,:fixlog,:start,:stop,:push,:clear,:open]
 
+  # JiraConsole will store timer intervals into this config file
   CONFIG_FILE = File.join(File.expand_path('~'), 'jira.yml')
 
+  # This function initializes the program
+  # It will parse arguments, and loads parameters and reports error if there are any..
   def initialize settings,args
     @errors = []
     @command = []
@@ -172,8 +183,11 @@ EOT
     log_errors
   end
 
+  # --
   # {{{ jira and user parameters
+  # ++
 
+  # It will deserialize stoppers and prints out info about them 
   def load_stoppers
     if File.exists?(CONFIG_FILE)
       @stoppers = YAML::load_file(CONFIG_FILE)
@@ -188,14 +202,20 @@ EOT
     end
 
     if @stoppers.length > 0
-      puts "There are #{@stoppers.length} stoppers."
+      if @stoppers.length == 1
+        puts 'There is a stopper.'
+        puts( "Active stopper:( #{on.length} : #{on.join(', ')} ).")  if on.length > 0
+      else
+        puts "There are #{@stoppers.length} stoppers."
+        puts( "Active stoppers:( #{on.length} : #{on.join(', ')} ).")  if on.length > 0
+      end
       
-      puts( "Active stoppers:( #{on.length} : #{on.join(', ')} ).")  if on.length > 0
     else
       puts "No stoppers."
     end
   end
 
+  # This will load settings file
   def load_parameters
     return false unless (@service.keys & [:jira,:filter]).size == 2
     @jira = @service[:jira]
@@ -210,6 +230,7 @@ EOT
     false
   end
 
+  # Serialize stoppers 
   def save_stoppers
     File.open(CONFIG_FILE,'w') do |f|
       f.puts @stoppers.to_yaml
@@ -217,7 +238,10 @@ EOT
   end
   # }}}
 
+  # --
   # {{{ default settings display=short
+  # ++
+
   def load_defaults!
     @key,@time,@message=nil,nil,nil
     @find = nil
@@ -229,7 +253,10 @@ EOT
   end
   # }}}
 
-# {{{ command execution
+
+  # --
+  # {{{ command execution
+  # ++
   
   def success?
     errors.empty?
@@ -259,9 +286,11 @@ EOT
   def log_errors
     puts "Errors: #{@errors.join(',')}." unless success?
   end
-# }}}
+  # }}}
 
+  # --
   # {{{ ARGV parser and minimal help
+  # ++
   def parse *args
     load_defaults!
     args.each_with_index do |arg,index|
@@ -290,15 +319,21 @@ EOT
   end
   # }}}
 
+  # --
   # {{{ logger
+  # ++
   def create_logger
     @log = Logger.new(STDOUT)
     @log.level = Logger::ERROR
   end
   # }}}
 
+  # --
   # {{{ command helpers
+  # ++
 
+  # It will look for a +param+ named instance variable.
+  # If it isn't exists, than starts an editor - $EDITOR; defaults to vim - to get parameters in yaml format
   def check_required param
     a=instance_eval("defined?(@#{param})")
     return if a and not a.empty?
@@ -318,6 +353,7 @@ EOT
     system("rm #{filename}")
   end
 
+  # it returns true if regular expression +find+ matches one of the issue-s attribute.
   def match find,key,issue
     return true unless find or key
     return true if find and (issue.summary + issue.reporter + issue.key) =~ /#{find}/i
@@ -350,12 +386,14 @@ EOT
   end
 
   def help
-    puts HELP
+    RDoc::usage()
     true
   end
-# }}}
+  # }}}
 
-# {{{ commands
+  # --
+  # {{{ commands
+  # ++
 
   def start
     sel = @stoppers.select{|s| s.task == @key}
@@ -490,6 +528,8 @@ EOT
   
 
 end
+
+# we create an instance and start it:
 
 j = JiraConsole.new(@@settings,ARGV)
 j.run!
