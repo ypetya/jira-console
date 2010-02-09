@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>load_stoppers (JiraConsole)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File jira.rb, line 191</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">load_stoppers</span>
+    <span class="ruby-keyword kw">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-constant">CONFIG_FILE</span>)
+      <span class="ruby-ivar">@stoppers</span> = <span class="ruby-constant">YAML</span><span class="ruby-operator">::</span><span class="ruby-identifier">load_file</span>(<span class="ruby-constant">CONFIG_FILE</span>)
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-ivar">@stoppers</span> = []
+    <span class="ruby-keyword kw">end</span>
+
+    <span class="ruby-identifier">sum</span> = <span class="ruby-value">0</span>
+    <span class="ruby-identifier">on</span> = []
+    <span class="ruby-ivar">@stoppers</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">stopper</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">on</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">stopper</span>.<span class="ruby-identifier">task</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">stopper</span>.<span class="ruby-identifier">on?</span>
+    <span class="ruby-keyword kw">end</span>
+
+    <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@stoppers</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+      <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@stoppers</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span>
+        <span class="ruby-identifier">puts</span> <span class="ruby-value str">'There is a stopper.'</span>
+        <span class="ruby-identifier">puts</span>( <span class="ruby-node">&quot;Active stopper:( #{on.length} : #{on.join(', ')} ).&quot;</span>)  <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">on</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+      <span class="ruby-keyword kw">else</span>
+        <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;There are #{@stoppers.length} stoppers.&quot;</span>
+        <span class="ruby-identifier">puts</span>( <span class="ruby-node">&quot;Active stoppers:( #{on.length} : #{on.join(', ')} ).&quot;</span>)  <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">on</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+      <span class="ruby-keyword kw">end</span>
+      
+    <span class="ruby-keyword kw">else</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;No stoppers.&quot;</span>
+    <span class="ruby-keyword kw">end</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

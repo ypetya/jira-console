@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>list (JiraConsole)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File jira.rb, line 457</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">list</span>
+    <span class="ruby-ivar">@counter</span> = <span class="ruby-value">0</span>
+    <span class="ruby-comment cmt">#main listing</span>
+    <span class="ruby-ivar">@jira4r</span>.<span class="ruby-identifier">getIssuesFromFilter</span>(<span class="ruby-ivar">@filter</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">issue</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword kw">next</span> <span class="ruby-keyword kw">if</span> <span class="ruby-keyword kw">not</span> <span class="ruby-identifier">match</span> <span class="ruby-ivar">@find</span>,<span class="ruby-ivar">@key</span>,<span class="ruby-identifier">issue</span>
+      <span class="ruby-ivar">@counter</span> <span class="ruby-operator">+=</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;#{issue.key} : #{issue.summary}&quot;</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Reporter : #{issue.reporter}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@reporter</span> <span class="ruby-operator">==</span> <span class="ruby-value str">'true'</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;DESCRIPTION:\r\n#{issue.description}&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@description</span> <span class="ruby-operator">==</span> <span class="ruby-value str">'true'</span>
+      <span class="ruby-identifier">get_comments</span>(<span class="ruby-identifier">issue</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-node">%w{full comments}</span>.<span class="ruby-identifier">include?</span> <span class="ruby-ivar">@display</span>
+      <span class="ruby-identifier">get_worklogs</span>(<span class="ruby-identifier">issue</span>) <span class="ruby-keyword kw">if</span> <span class="ruby-node">%w{full worklogs}</span>.<span class="ruby-identifier">include?</span> <span class="ruby-ivar">@display</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-value str">'.'</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@description</span> <span class="ruby-operator">==</span> <span class="ruby-value str">'true'</span>
+    <span class="ruby-keyword kw">end</span>
+
+    <span class="ruby-comment cmt"># total count</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Total: #{@counter} tasks found.&quot;</span> <span class="ruby-keyword kw">if</span> <span class="ruby-ivar">@total</span><span class="ruby-operator">==</span><span class="ruby-value str">'true'</span>
+    <span class="ruby-keyword kw">true</span>
+  <span class="ruby-keyword kw">rescue</span>
+    <span class="ruby-keyword kw">false</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

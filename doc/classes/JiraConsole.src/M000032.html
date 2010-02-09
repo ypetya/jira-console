@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>comment (JiraConsole)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File jira.rb, line 494</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">comment</span>
+    <span class="ruby-node">%w{key message}</span>.<span class="ruby-identifier">each</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">p</span><span class="ruby-operator">|</span> <span class="ruby-identifier">check_required</span> <span class="ruby-identifier">p</span> }
+    <span class="ruby-identifier">c</span>= <span class="ruby-constant">Jira4R</span><span class="ruby-operator">::</span><span class="ruby-constant">V2</span><span class="ruby-operator">::</span><span class="ruby-constant">RemoteComment</span>.<span class="ruby-identifier">new</span>
+    <span class="ruby-identifier">c</span>.<span class="ruby-identifier">body</span>= <span class="ruby-ivar">@message</span>
+    <span class="ruby-ivar">@jira4r</span>.<span class="ruby-identifier">addComment</span>(<span class="ruby-ivar">@key</span>.<span class="ruby-identifier">upcase</span>,<span class="ruby-identifier">c</span>)
+    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot; #{@key.upcase} - #{@message}&quot;</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-value str">&quot;Comment added&quot;</span>
+    <span class="ruby-keyword kw">true</span>
+  <span class="ruby-keyword kw">rescue</span>
+    <span class="ruby-keyword kw">false</span>
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>

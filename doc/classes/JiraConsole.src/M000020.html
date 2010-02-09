@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>check_required (JiraConsole)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre><span class="ruby-comment cmt"># File jira.rb, line 337</span>
+  <span class="ruby-keyword kw">def</span> <span class="ruby-identifier">check_required</span> <span class="ruby-identifier">param</span>
+    <span class="ruby-identifier">a</span>=<span class="ruby-identifier">instance_eval</span>(<span class="ruby-node">&quot;defined?(@#{param})&quot;</span>)
+    <span class="ruby-keyword kw">return</span> <span class="ruby-keyword kw">if</span> <span class="ruby-identifier">a</span> <span class="ruby-keyword kw">and</span> <span class="ruby-keyword kw">not</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">filename</span> = <span class="ruby-node">&quot;#{param}.jira.tmp&quot;</span>
+    <span class="ruby-identifier">system</span>(<span class="ruby-node">&quot;echo \&quot;\# please enter missing parameter or parameters in standard YAML format\n#{param}:\n\&quot; &gt; #{filename}&quot;</span>)
+    <span class="ruby-identifier">cmd</span> = <span class="ruby-node">&quot;#{ENV['EDITOR'] || 'vim'} #{filename}&quot;</span>
+    
+    <span class="ruby-identifier">system</span>(<span class="ruby-node">&quot;#{cmd}&quot;</span>)
+    <span class="ruby-identifier">hash</span> = <span class="ruby-constant">YAML</span>.<span class="ruby-identifier">load_file</span>(<span class="ruby-identifier">filename</span>)
+   
+    <span class="ruby-identifier">throw</span> <span class="ruby-value str">'not valid yaml format! try: &quot;param: value&quot;'</span> <span class="ruby-keyword kw">unless</span> <span class="ruby-keyword kw">defined?</span>(<span class="ruby-identifier">hash</span>.<span class="ruby-identifier">keys</span>)
+
+    <span class="ruby-identifier">hash</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword kw">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">k</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">eval</span>(<span class="ruby-node">&quot;@#{k}='#{hash[k]}'&quot;</span>)
+      <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;#{k} parameter loaded&quot;</span>
+    <span class="ruby-keyword kw">end</span>
+    <span class="ruby-identifier">system</span>(<span class="ruby-node">&quot;rm #{filename}&quot;</span>)
+  <span class="ruby-keyword kw">end</span></pre>
+</body>
+</html>
