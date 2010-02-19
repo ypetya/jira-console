@@ -37,7 +37,7 @@
 #
 # == COMMANDS: (optional)
 #
-#  * list
+#  * list (or show)
 #       display jira issues (default command) 
 #  * comment
 #       post new comment on task
@@ -116,6 +116,7 @@ require 'jira4r/jira_tool'
 require 'yaml'
 require 'rdoc/usage'
 
+# TODO: It would be great to print out the actuel summary of the stopper
 # This class can store different intervals for one issue 
 class TaskStopper
 
@@ -162,7 +163,7 @@ class JiraConsole
 
   # These commands are available from command line. 
   # See usage for the required and optional parameters
-  COMMANDS = [:log,:list,:help,:comment,:fixlog,:start,:stop,:push,:clear,:open]
+  COMMANDS = [:log,:list,:show,:help,:comment,:fixlog,:start,:stop,:push,:clear,:open]
 
   # JiraConsole will store timer intervals into this config file
   CONFIG_FILE = File.join(File.expand_path('~'), 'jira.yml')
@@ -473,6 +474,11 @@ class JiraConsole
     true
   rescue
     false
+  end
+
+  # it is the same as the list
+  def show
+    list
   end
 
   # This command helps to create new worklogs
